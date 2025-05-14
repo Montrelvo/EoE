@@ -1,26 +1,9 @@
 import { MAX_LOG_MESSAGES } from '../config/constants.js';
 
-// Initialize combatLogElement here, as it's specific to this utility's DOM interaction.
-// This assumes the DOM is ready or will be ready when this module is first used.
-// A more robust solution might involve passing the element or initializing it on demand.
-let combatLogElement = null;
-
-// Function to initialize the combat log element, can be called when DOM is ready
-export function initializeCombatLogElement() {
-    combatLogElement = document.getElementById('combat-log');
+export function updateCombatLog(combatLogElement, message) {
     if (!combatLogElement) {
-        console.warn("Combat log element 'combat-log' not found during initialization.");
-    }
-}
-
-export function updateCombatLog(message) {
-    if (!combatLogElement) {
-        // Attempt to initialize if not already done, or if it failed previously
-        initializeCombatLogElement();
-        if (!combatLogElement) { // Still not found
-            console.warn("Combat log element not found! Message not logged to UI:", message);
-            return;
-        }
+        console.warn("Combat log element not provided! Message not logged to UI:", message);
+        return;
     }
 
     const messageElement = document.createElement('p');

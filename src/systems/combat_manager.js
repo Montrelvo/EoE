@@ -4,11 +4,12 @@ import { LootTable } from './loot_table.js';
 import { updateCombatLog } from '../utils/ui_logger.js';
 
 export class CombatManager {
-  constructor(scene, heroArchetype = null) { // Accept scene context and optional archetype
+  constructor(scene, heroArchetype = null, combatLogElement) { // Accept scene context, optional archetype, and combat log element
     this.scene = scene; // Store scene context
     this.hero = new Hero(heroArchetype); // Pass archetype to Hero constructor
     this.currentEnemy = null;
     this.combatInterval = null;
+    this.combatLogElement = combatLogElement; // Store the combat log element
   }
 
   startAutoCombat() {
@@ -32,11 +33,11 @@ export class CombatManager {
           this.combatInterval = null;
           const message = "Auto-combat stopped.";
           console.log(message); // Keep console.log for debugging if desired
-          updateCombatLog(message);
-      }
-  }
+          updateCombatLog(this.combatLogElement, message);
+     }
+ }
 
-  spawnNewEnemy() {
+ spawnNewEnemy() {
       // If there's an old enemy sprite, destroy it first
       if (this.scene.enemySprite) {
           this.scene.enemySprite.destroy();
@@ -47,10 +48,10 @@ export class CombatManager {
       this.currentEnemy = new Enemy(tier);
       const message = `New enemy spawned: Tier ${this.currentEnemy.tier}, Health ${this.currentEnemy.stats.health}`;
       console.log(message);
-      updateCombatLog(message);
+      updateCombatLog(this.combatLogElement, message);
 
-      // Create placeholder graphics for the new enemy
-      // This assumes 'this.scene' is a Phaser scene and has 'add.graphics()'
+     // Create placeholder graphics for the new enemy
+     // This assumes 'this.scene' is a Phaser scene and has 'add.graphics()'
       if (this.scene && typeof this.scene.add === 'object' && typeof this.scene.add.graphics === 'function') {
         this.scene.enemySprite = this.scene.add.graphics();
         this.scene.enemySprite.fillStyle(0xff0000, 1); // Red rectangle
@@ -80,10 +81,10 @@ export class CombatManager {
       // Hero couldn't attack (e.g., out of stamina)
       const message = "Hero out of stamina!";
       console.log(message);
-      updateCombatLog(message);
-    }
+      updateCombatLog(this.combatLogElement, message);
+   }
 
-    // Enemy attacks if still alive and hero is alive
+   // Enemy attacks if still alive and hero is alive
     if (this.currentEnemy && this.currentEnemy.stats.health > 0 && this.hero.stats.health > 0) {
       this.currentEnemy.attack(this.hero);
       // Check if hero died from enemy attack
@@ -102,10 +103,10 @@ export class CombatManager {
     // Note: JSON.stringify for modifiers might be too verbose for UI log, but good for console
     const uiLogMessage = `Enemy defeated! Loot found: Tier ${loot.tier}, Rarity ${loot.rarity}`;
     console.log(`${uiLogMessage} (${JSON.stringify(loot.modifiers)})`);
-    updateCombatLog(uiLogMessage);
+    updateCombatLog(this.combatLogElement, uiLogMessage);
 
 
-    // Award XP
+   // Award XP
     this.hero.gainXP(defeatedEnemy.stats.xpValue);
 
     // TODO: Add loot to inventory or apply effects
@@ -123,9 +124,9 @@ export class CombatManager {
   handleHeroDefeat() {
     const message = "Hero has been defeated!";
     console.error(message);
-    updateCombatLog(`ERROR: ${message}`);
-    this.stopAutoCombat(); // Stop combat
-    // TODO: Implement respawn logic, penalties, etc.
+    updateCombatLog(this.combatLogElement, `ERROR: ${message}`);
+   this.stopAutoCombat(); // Stop combat
+   // TODO: Implement respawn logic, penalties, etc.
     // Maybe disable UI elements or show a "Defeated" screen
   }
 } // End CombatManager Class
